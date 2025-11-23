@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Admin - SIM Asrama UIN Saizu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif; }
+    body { display:flex; background-color:#f5f8f7; min-height:100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; top:0; left:0;
+      width:250px; height:100vh;
+      background-color:#007e5a; color:white;
+      display:flex; flex-direction:column;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+      transition: left 0.3s ease; z-index:1000;
+    }
+    .sidebar.collapsed { left:-250px; }
+    .sidebar h2 { text-align:center; padding:25px; background-color:#009b72; font-size:18px; font-weight:600; }
+    .sidebar ul { list-style:none; margin-top:10px; padding-left:0; }
+    .sidebar ul li { padding:14px 25px; cursor:pointer; display:flex; align-items:center; gap:10px; transition:0.3s; }
+    .sidebar ul li:hover, .sidebar ul li.active { background-color:#00b985; }
+    .sidebar ul li a { text-decoration:none; color:white; display:flex; align-items:center; width:100%; gap:10px; }
+    .logout-btn { background:none; color:white; border:1px solid white; padding:10px 25px; border-radius:25px; font-size:14px; cursor:pointer; margin:30px auto; width:80%; transition:0.3s; }
+    .logout-btn:hover { background:white; color:#007e5a; }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left:250px;
+      flex-grow:1;
+      padding:30px 40px;
+      transition: margin-left 0.3s ease, width 0.3s ease;
+      width: calc(100% - 250px);
+    }
+    .main-content.fullscreen { margin-left:0; width:100%; }
+
+    /* TOP BAR */
+    .top-bar { display:flex; align-items:center; justify-content:space-between; background:white; padding:10px 20px; border-radius:16px; margin-bottom:30px; box-shadow:0 2px 6px rgba(0,0,0,0.1); gap:15px; }
+    .left-group { display:flex; align-items:center; gap:10px; }
+    .top-bar h1 { color:#006d55; font-size:24px; margin:0; }
+    .hamburger-card { width:50px; height:50px; border-radius:12px; background:#e6f7ef; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .profile { display:flex; align-items:center; gap:10px; background-color:#e8f3ef; padding:6px 15px; border-radius:30px; }
+    .profile img { width:36px; height:36px; border-radius:50%; }
+    .profile span { color:#006d55; font-weight:500; }
+
+    /* CARD */
+    .card { background:white; border-radius:16px; padding:25px; box-shadow:0 4px 10px rgba(0,0,0,0.08); margin-bottom:25px; }
+    .card h3 { color:#007e5a; margin-bottom:15px; font-size:18px; display:flex; align-items:center; gap:8px; }
+    .add-btn { background-color:#00a67a; color:white; border:none; padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer; margin-bottom:15px; display:flex; align-items:center; gap:8px; transition:0.3s; }
+    .add-btn:hover { background-color:#008f66; }
+
+    table { width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; text-align:center; }
+    th { background-color:#007e5a; color:white; }
+    tr:hover { background-color:#f1f1f1; }
+
+    .action-btn { background:none; border:none; cursor:pointer; font-size:16px; margin:0 5px; transition:0.3s; }
+    .edit { color:#00a67a; } .edit:hover { color:#00885f; }
+    .delete { color:#e04f4f; } .delete:hover { color:#b93737; }
+
+    /* RESPONSIVE */
+    @media(max-width:768px){ .sidebar { width:200px; left:-200px; } .main-content { margin-left:0; width:100%; padding:20px; } }
+
+    /* MODAL */
+    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; z-index:2000; }
+    .modal-content { width:380px; background:#fff; border-radius:12px; padding:25px; display:flex; flex-direction:column; gap:12px; }
+    .modal-content h2 { margin-bottom:5px; color:#007e5a; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:5px; }
+    .btn { border:none; padding:8px 16px; border-radius:6px; cursor:pointer; }
+    .btn.save { background:#007e5a; color:white; }
+    .btn.cancel { background:#ccc; }
+
+    /* TOAST */
+    .toast {
+  position: fixed;
+  bottom: -60px; /* awalnya tersembunyi */
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 200px;
+  text-align: center;
+  opacity: 0;
+  transition: bottom 0.4s ease, opacity 0.4s ease;
+  z-index: 3000;
+}
+.toast.show {
+  bottom: 25px; /* muncul ke atas */
+  opacity: 1;
+}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <h2><i class="fa-solid fa-user-gear"></i> Super Admin</h2>
+  <ul>
+    <li><a href="superadmin.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+    <li class="active"><a href="kelola_admin.html"><i class="fa-solid fa-users-gear"></i> Kelola Admin</a></li>
+    <li><a href="data_asrama.html"><i class="fa-solid fa-building-user"></i> Data Asrama</a></li>
+    <li><a href="laporan_super.html"><i class="fa-solid fa-file-lines"></i> Laporan</a></li>
+    <li><a href="pengaturan_super.html"><i class="fa-solid fa-sliders"></i> Pengaturan</a></li>
+  </ul>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</aside>
+
+<main class="main-content">
+  <div class="top-bar">
+    <div class="left-group">
+      <div class="hamburger-card" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+      <h1><i class="fa-solid fa-users-gear"></i> Kelola Admin Asrama</h1>
+    </div>
+    <div class="profile">
+      <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Super Admin">
+      <span id="username"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><i class="fa-solid fa-list"></i> Daftar Admin Asrama</h3>
+    <button class="add-btn"><i class="fa-solid fa-plus"></i> Tambah Admin</button>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Admin</th>
+          <th>Email</th>
+          <th>Asrama</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <input type="hidden" id="formMode">
+
+  <div id="modalForm" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Tambah Admin</h2>
+      <label>Nama Admin</label>
+      <input type="text" id="nama" placeholder="Masukkan nama admin">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="Masukkan email admin">
+      <label>Asrama</label>
+      <select id="asrama">
+        <option>Asrama Putra 1</option>
+        <option>Asrama Putra 2</option>
+        <option>Asrama Putri</option>
+      </select>
+      <label>Status</label>
+      <select id="status">
+        <option>Aktif</option>
+        <option>Nonaktif</option>
+      </select>
+      <div class="modal-actions">
+        <button id="btnSimpan" class="btn save">Simpan</button>
+        <button id="btnBatal" class="btn cancel">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</main>
+
+<script>
+  // SIDEBAR
+  function toggleSidebar() { document.querySelector(".sidebar").classList.toggle("collapsed"); document.querySelector(".main-content").classList.toggle("fullscreen"); }
+  function logout() { if(confirm("Yakin ingin keluar?")) window.location.href="index.html"; }
+  document.getElementById("username").innerText = localStorage.getItem("username");
+
+  // DATA
+  let dataAdmin = JSON.parse(localStorage.getItem("dataAdmin")) || [];
+  function saveData() { localStorage.setItem("dataAdmin", JSON.stringify(dataAdmin)); renderTable(); }
+
+  // MODAL
+  function openModal() { document.getElementById("modalForm").style.display = "flex"; }
+  function closeModal() { document.getElementById("modalForm").style.display = "none"; }
+
+  // TOAST
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.classList.add("show");
+    setTimeout(()=> toast.classList.remove("show"), 2000);
+  }
+
+  // TAMBAH ADMIN
+  document.querySelector(".add-btn").addEventListener("click", () => {
+    document.getElementById("formMode").value = "tambah";
+    document.getElementById("modalTitle").innerText = "Tambah Admin";
+    document.getElementById("nama").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("asrama").value = "Asrama Putra 1";
+    document.getElementById("status").value = "Aktif";
+    openModal();
+  });
+
+  // EDIT
+  function editData(index) {
+    document.getElementById("formMode").value = index;
+    document.getElementById("modalTitle").innerText = "Edit Admin";
+    document.getElementById("nama").value = dataAdmin[index].nama;
+    document.getElementById("email").value = dataAdmin[index].email;
+    document.getElementById("asrama").value = dataAdmin[index].asrama;
+    document.getElementById("status").value = dataAdmin[index].status;
+    openModal();
+  }
+
+  // SIMPAN
+  document.getElementById("btnSimpan").addEventListener("click", () => {
+    let nama = document.getElementById("nama").value;
+    let email = document.getElementById("email").value;
+    let asrama = document.getElementById("asrama").value;
+    let status = document.getElementById("status").value;
+    let mode = document.getElementById("formMode").value;
+    if(!nama || !email || !asrama || !status) {
+      alert("Semua field harus diisi!");
+      return;
+    }
+
+    if(mode === "tambah") {
+      dataAdmin.push({nama,email,asrama,status});
+      showToast("Admin berhasil ditambahkan");
+    } else {
+      dataAdmin[mode] = {nama,email,asrama,status};
+      showToast("Admin berhasil diperbarui");
+    }
+    saveData();
+    closeModal();
+  });
+
+  // BATAL
+  document.getElementById("btnBatal").addEventListener("click", closeModal);
+
+  // HAPUS
+  function deleteData(index) {
+    if(confirm("Yakin ingin menghapus data?")) {
+      dataAdmin.splice(index,1);
+      saveData();
+      showToast("Admin berhasil dihapus");
+    }
+  }
+
+  // RENDER TABEL
+  function renderTable() {
+    let tableBody = "";
+    dataAdmin.forEach((admin,index)=>{
+      tableBody += `
+      <tr>
+        <td>${index+1}</td>
+        <td>${admin.nama}</td>
+        <td>${admin.email}</td>
+        <td>${admin.asrama}</td>
+        <td><span style="color:${admin.status==='Aktif'?'green':'orange'};font-weight:600;">${admin.status}</span></td>
+        <td>
+          <button class="action-btn edit" onclick="editData(${index})"><i class="fa-solid fa-pen"></i></button>
+          <button class="action-btn delete" onclick="deleteData(${index})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`;
+    });
+    document.querySelector("table tbody").innerHTML = tableBody;
+  }
+  renderTable();
+</script>
+</body>
+</html>

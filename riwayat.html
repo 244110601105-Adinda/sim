@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat Penghuni - SIM Asrama UIN Saizu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+    body { display:flex; background-color:#f5f8f7; min-height:100vh; overflow-x:hidden; }
+
+    /* SIDEBAR FIX */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: #007e5a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+    .sidebar.collapsed { left: -250px; }
+    .sidebar h2 { text-align: center; padding: 25px; background-color: #009b72; font-size: 18px; font-weight: 600; }
+    .sidebar ul { list-style: none; margin-top: 10px; padding-left: 0; }
+    .sidebar ul li { padding: 14px 25px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+    .sidebar ul li:hover, .sidebar ul li.active { background-color: #00b985; }
+    .sidebar ul li a { text-decoration: none; color: white; display: flex; align-items: center; width: 100%; gap: 10px; }
+    .logout-btn { background: none; color: white; border: 1px solid white; padding: 10px 25px; border-radius: 25px; font-size: 14px; cursor: pointer; margin: 30px auto; width: 80%; transition: 0.3s; }
+    .logout-btn:hover { background: white; color: #007e5a; }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 250px;
+      flex-grow: 1;
+      padding: 30px 40px;
+      transition: margin-left 0.3s ease, width 0.3s ease;
+      width: calc(100% - 250px);
+    }
+    .main-content.fullscreen { margin-left: 0; width: 100%; }
+
+    /* TOP BAR */
+    .top-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      background:white; padding:10px 20px; border-radius:16px; margin-bottom:30px; box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    }
+    .top-left { display:flex; align-items:center; gap:10px; }
+    .hamburger-card {
+      width:50px; height:50px; border-radius:12px; background:#e6f7ef; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    }
+    .top-title { font-size:20px; color:#007e5a; font-weight:600; }
+    .user-card { display:flex; align-items:center; gap:10px; background:#e6f7ef; padding:6px 15px; border-radius:30px; }
+    .user-card img { width:36px; height:36px; border-radius:50%; object-fit:cover; }
+    .user-card span { color:#007e5a; font-weight:500; }
+
+    /* CARD & TABLE */
+    .card { background:white; border-radius:16px; padding:25px; box-shadow:0 4px 10px rgba(0,0,0,0.08); margin-bottom:25px; }
+    .card h3 { color:#007e5a; margin-bottom:15px; font-size:18px; display:flex; align-items:center; gap:8px; }
+    table { width:100%; border-collapse:collapse; margin-top:15px; font-size:14px; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; text-align:center; }
+    th { background-color:#007e5a; color:white; }
+    tr:hover { background-color:#f1f1f1; }
+    .status-diterima { color:green; font-weight:600; }
+    .status-menunggu { color:orange; font-weight:600; }
+    .status-ditolak { color:red; font-weight:600; }
+
+    @media(max-width:768px){ .sidebar{display:none;} .main-content{margin-left:0; width:100%;} }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <h2><i class="fa-solid fa-building-columns"></i> Penghuni Asrama</h2>
+    <ul>
+      <li><a href="dashboard_user.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+      <li><a href="profil.html"><i class="fa-solid fa-id-card"></i> Profil Saya</a></li>
+      <li><a href="pembayaran.html"><i class="fa-solid fa-wallet"></i> Pembayaran</a></li>
+      <li><a href="jadwaluser.html"><i class="fa-solid fa-calendar-days"></i> Jadwal Kegiatan</a></li>
+      <li class="active"><a href="riwayat.html"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</a></li>
+    </ul>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="top-left">
+        <div class="hamburger-card" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+        <div class="top-title"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Penghuni</div>
+      </div>
+      <div class="user-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User">
+        <span id="username">Loading...</span>
+      </div>
+    </div>
+
+    <!-- RIWAYAT PEMBAYARAN -->
+    <div class="card">
+      <h3><i class="fa-solid fa-wallet"></i> Riwayat Pembayaran</h3>
+      <table>
+        <tr><th>Tanggal</th><th>Jenis</th><th>Nominal</th><th>Status</th></tr>
+        <tbody id="tabelPembayaran">
+          <tr><td>05 Nov 2025</td><td>Sewa Asrama</td><td>Rp500.000</td><td class="status-diterima">Diterima</td></tr>
+          <tr><td>12 Okt 2025</td><td>Kegiatan</td><td>Rp150.000</td><td class="status-menunggu">Menunggu</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RIWAYAT KEGIATAN -->
+    <div class="card">
+      <h3><i class="fa-solid fa-calendar-check"></i> Riwayat Kegiatan</h3>
+      <table>
+        <tr><th>Tanggal</th><th>Nama Kegiatan</th><th>Status Kehadiran</th><th>Keterangan</th></tr>
+        <tbody id="tabelKegiatan">
+          <tr><td>02 Nov 2025</td><td>Kerja Bakti Asrama</td><td class="status-diterima">Hadir</td><td>-</td></tr>
+          <tr><td>28 Okt 2025</td><td>Pengajian Rutin</td><td class="status-ditolak">Tidak Hadir</td><td>Sakit</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RIWAYAT PELANGGARAN -->
+    <div class="card">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Riwayat Pelanggaran</h3>
+      <table>
+        <tr><th>Tanggal</th><th>Jenis Pelanggaran</th><th>Tingkat</th><th>Tindakan</th></tr>
+        <tbody id="tabelPelanggaran">
+          <tr><td>10 Okt 2025</td><td>Terlambat Jam Malam</td><td>Ringan</td><td>Peringatan Lisan</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+<script>
+  // Cek login
+  const username = localStorage.getItem("username") || "Penghuni";
+  document.getElementById("username").innerText = username;
+
+  function logout() {
+    if(confirm("Yakin ingin keluar?")){
+      window.location.href="index.html";
+    }
+  }
+
+  // Toggle sidebar
+  function toggleSidebar(){
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("mainContent");
+    sidebar.classList.toggle("collapsed");
+    main.classList.toggle("fullscreen");
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIM Asrama UIN Saizu</title>
+
+  <!-- Google Font + Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background-color: #f5faf8; color: #222; overflow-x: hidden; }
+
+    /* ===== NAVBAR ===== */
+    header { display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:18px 50px; border-radius:0 0 20px 20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); position:sticky; top:0; z-index:100; transition:all .3s; }
+    header.scrolled { background-color:#00a884; padding:14px 50px; }
+    header.scrolled .logo-text, header.scrolled nav a { color:#fff; }
+
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo img { width:40px; height:40px; border-radius:10px; object-fit:cover; }
+    .logo-text { font-weight:600; font-size:18px; color:#007a63; transition:color .3s; }
+
+    nav a { text-decoration:none; margin-left:30px; color:#333; font-weight:500; transition:color .3s; cursor:pointer; position:relative; padding-bottom:5px; }
+    nav a:hover { color:#00a884; }
+    nav a.active { color:#00a884; font-weight:600; }
+    nav a.active::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:3px; background-color:#00a884; border-radius:2px; animation:underline .3s ease; }
+    @keyframes underline { from{width:0} to{width:100%} }
+
+    /* ===== HERO ===== */
+    .hero { display:flex; justify-content:space-between; align-items:center; padding:80px 10%; background:#fff; border-radius:20px; margin:60px auto; width:85%; box-shadow:0 6px 16px rgba(0,0,0,0.05); animation:fadeIn .6s ease; }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+
+    .hero-text { max-width:48%; animation:slideUp .8s ease; }
+    @keyframes slideUp { from{transform:translateY(25px); opacity:0} to{transform:translateY(0); opacity:1} }
+    .hero-text h1 { font-size:32px; color:#004f40; margin-bottom:15px; line-height:1.4; font-weight:700; }
+    .hero-text p { color:#555; margin-bottom:30px; line-height:1.7; }
+    .hero-text button { background:#00a884; color:#fff; padding:14px 30px; border:none; border-radius:30px; font-weight:600; cursor:pointer; box-shadow:0 6px 15px rgba(0,168,132,0.3); transition:background .3s, transform .2s; }
+    .hero-text button:hover { background:#009070; transform:translateY(-2px); }
+
+    .hero-image { width:45%; height:320px; border-radius:20px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; background:#e5f8f1; }
+    .hero-image img { width:100%; height:100%; object-fit:cover; }
+
+    /* ===== FORM REGISTRASI ===== */
+    #registerModal .form-group { margin-bottom:20px; text-align:left; }
+    #registerModal label { display:block; font-weight:500; margin-bottom:6px; color:#004f40; font-size:14px; }
+    #registerModal input { width:100%; padding:12px 15px; border-radius:12px; border:1px solid #ccc; outline:none; font-size:14px; transition:border .3s, box-shadow .3s; }
+    #registerModal input:focus { border-color:#00a884; box-shadow:0 0 8px rgba(0,168,132,0.2); }
+    #registerModal .login-btn { width:100%; padding:14px; border-radius:30px; background:#00a884; color:white; font-weight:600; font-size:15px; cursor:pointer; border:none; transition:all .3s ease; }
+    #registerModal .login-btn:hover { background:#009070; transform:translateY(-2px); }
+    #registerModal .close-btn { margin-top:15px; font-size:13px; color:#777; cursor:pointer; background:none; border:none; transition:color .2s; }
+    #registerModal .close-btn:hover { color:#333; }
+
+    /* ===== FEATURES ===== */
+    .features { display:flex; flex-wrap:wrap; justify-content:space-between; gap:25px; width:85%; margin:50px auto; }
+    .feature-box { flex:1 1 calc(25% - 25px); min-width:220px; background:#fff; border-radius:16px; text-align:center; padding:30px 20px; box-shadow:0 6px 12px rgba(0,0,0,0.05); transition:all .3s; }
+    .feature-box:hover { transform:translateY(-6px); box-shadow:0 10px 18px rgba(0,0,0,0.08); }
+    .feature-icon { width:70px; height:70px; margin:0 auto 18px; background:#e2f7f0; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#00a884; }
+    .feature-box h3 { font-size:16px; font-weight:600; color:#004f40; }
+
+    /* ===== FOOTER ===== */
+    footer { text-align:center; padding:25px 0; color:#555; font-size:14px; background:#fff; box-shadow:0 -4px 12px rgba(0,0,0,0.03); margin-top:60px; }
+
+    /* ===== MODAL LOGIN ===== */
+    .modal { display:none; position:fixed; z-index:200; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; backdrop-filter:blur(3px); }
+    .modal-content { background:#fff; border-radius:20px; padding:50px 70px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.15); animation:popUp .3s ease; width:520px; max-width:95%; }
+    @keyframes popUp { from{transform:scale(.8); opacity:0} to{transform:scale(1); opacity:1} }
+    .modal-content h2 { color:#007a63; margin-bottom:30px; font-size:22px; }
+    .login-buttons { display:flex; justify-content:center; gap:20px; }
+    .login-btn { background:#00a884; color:white; border:none; padding:14px 28px; border-radius:30px; font-weight:600; cursor:pointer; transition:background .3s, transform .2s; min-width:150px; }
+    .login-btn:hover { background:#009070; transform:translateY(-2px); }
+    .close-btn { margin-top:25px; background:none; border:none; color:#777; cursor:pointer; font-size:14px; transition:color .2s; }
+    .close-btn:hover { color:#333; }
+
+    /* RESPONSIVE */
+    @media (max-width:900px) {
+      .hero { flex-direction:column; text-align:center; gap:30px; }
+      .hero-text, .hero-image { max-width:100%; width:100%; }
+      .features { flex-direction:column; align-items:center; }
+      nav a { margin-left:15px; }
+      .info-card { flex:1 1 100%; }
+    }
+
+    /* HAMBURGER */
+    .hamburger { display:none; flex-direction:column; cursor:pointer; gap:5px; }
+    .hamburger span { width:25px; height:3px; background:#333; transition:.3s; }
+
+    @media (max-width:768px) {
+      header { padding:14px 25px; position:relative; }
+      .logo img { width:32px; height:32px; }
+      .logo-text { font-size:16px; }
+
+      nav { display:none; position:absolute; top:75px; right:20px; width:200px; background:white; flex-direction:column; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.15); border-radius:12px; z-index:999; }
+      nav.show { display:flex; }
+      nav a { margin:0; padding:10px 0; font-size:15px; border-bottom:1px solid #eee; }
+      nav a:last-child { border-bottom:none; }
+      .hamburger { display:flex; }
+    }
+
+    /* INFO KAMAR */
+    .info-kamar { width:85%; margin:60px auto; text-align:center; }
+    .info-kamar h2 { font-size:26px; color:#004f40; margin-bottom:35px; font-weight:700; }
+    .info-grid { display:flex; flex-wrap:wrap; gap:25px; justify-content:center; }
+    .info-card { flex:1 1 calc(25% - 25px); min-width:220px; background:#fff; padding:30px 25px; border-radius:16px; box-shadow:0 6px 14px rgba(0,0,0,0.05); transition:.3s; }
+    .info-card:hover { transform:translateY(-6px); box-shadow:0 10px 20px rgba(0,0,0,0.08); }
+    .icon-info { font-size:40px; color:#00a884; margin-bottom:15px; }
+    .info-card h3 { font-size:16px; color:#004f40; margin-bottom:8px; }
+    .info-card p { font-size:18px; font-weight:700; color:#009070; }
+  </style>
+</head>
+<body>
+
+  <header id="navbar">
+    <div class="logo">
+      <img src="logouin.jpg" alt="Logo UIN Saizu">
+      <div class="logo-text">SIM Asrama UIN Saizu</div>
+    </div>
+
+    <!-- HAMBURGER -->
+    <div class="hamburger" id="hamburger" aria-label="menu">
+      <span></span><span></span><span></span>
+    </div>
+
+    <!-- NAV -->
+    <nav id="navMenu" aria-label="main navigation">
+      <a href="index.html" class="active">Beranda</a>
+      <a href="tentang.html">Tentang</a>
+      <a id="loginLink">Login</a>
+      <a id="registerLink">Registrasi</a>
+    </nav>
+  </header>
+
+  <!-- MODAL REGISTRASI -->
+  <div id="registerModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h2>Registrasi Penghuni Baru</h2>
+      <form id="formDaftarPenghuni">
+        <div class="form-group">
+          <label for="nama_penghuni">Nama Lengkap</label>
+          <input id="nama_penghuni" name="nama_penghuni" type="text" placeholder="Masukkan nama lengkap" required>
+        </div>
+        <div class="form-group">
+          <label for="nim">NIM</label>
+          <input id="nim" name="nim" type="text" placeholder="Masukkan NIM" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="Masukkan email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Masukkan password" required>
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Konfirmasi Password</label>
+          <input id="confirm_password" name="confirm_password" type="password" placeholder="Ulangi password" required>
+        </div>
+        <button type="submit" class="login-btn">Daftar</button>
+      </form>
+      <button class="close-btn" id="closeRegister">Batal</button>
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Sistem Informasi Manajemen Asrama UIN Saizu</h1>
+      <p>Platform digital untuk mengelola data penghuni, kegiatan, dan pembayaran asrama secara efisien, cepat, dan transparan.</p>
+      <button id="masukBtn">Masuk Sekarang</button>
+    </div>
+    <div class="hero-image">
+      <img src="asrama.jpg" alt="Asrama UIN Saizu">
+    </div>
+  </section>
+
+  <!-- ===== INFO KAMAR ===== -->
+  <section class="info-kamar">
+    <h2>Informasi Asrama</h2>
+    <div class="info-grid">
+      <div class="info-card">
+        <i class="fas fa-door-open icon-info"></i>
+        <h3>Kamar Kosong</h3>
+        <p>12 Kamar</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-user-friends icon-info"></i>
+        <h3>Total Penghuni</h3>
+        <p>156 Orang</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-bed icon-info"></i>
+        <h3>Kamar Terisi</h3>
+        <p>38 Kamar</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-building icon-info"></i>
+        <h3>Total Kamar</h3>
+        <p>50 Kamar</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="features">
+    <div class="feature-box">
+      <div class="feature-icon"><i class="fas fa-users"></i></div>
+      <h3>Manajemen Penghuni</h3>
+    </div>
+    <div class="feature-box">
+      <div class="feature-icon"><i class="fas fa-credit-card"></i></div>
+      <h3>Pembayaran Online</h3>
+    </div>
+    <div class="feature-box">
+      <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+      <h3>Jadwal Kegiatan</h3>
+    </div>
+    <div class="feature-box">
+      <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+      <h3>Laporan Asrama</h3>
+    </div>
+  </section>
+
+  <footer>© 2025 SIM Asrama UIN Saizu — All Rights Reserved</footer>
+
+  <!-- ===== POPUP LOGIN ===== -->
+  <div id="loginModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h2>Pilih Jenis Login</h2>
+      <div class="login-buttons">
+        <button class="login-btn" onclick="window.location.href='login_admin.html'">Login Admin</button>
+        <button class="login-btn" onclick="window.location.href='login_user.html'">Login Penghuni</button>
+      </div>
+      <button class="close-btn" id="closeModal">Batal</button>
+    </div>
+  </div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script>
+    /* ========== Element refs ========== */
+    const registerModal = document.getElementById("registerModal");
+    const registerLink = document.getElementById("registerLink");
+    const closeRegister = document.getElementById("closeRegister");
+    const formDaftar = document.getElementById("formDaftarPenghuni");
+
+    const modalLogin = document.getElementById("loginModal");
+    const loginLink = document.getElementById("loginLink");
+    const closeModal = document.getElementById("closeModal");
+    const masukBtn = document.getElementById("masukBtn");
+
+    const navbar = document.getElementById("navbar");
+    const hamburger = document.getElementById("hamburger");
+    const navMenu = document.getElementById("navMenu");
+
+    /* ========== Helper: open/close modal ========== */
+    function openModal(modal) {
+      modal.style.display = "flex";
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden'; // prevent body scroll
+    }
+    function closeModalEl(modal) {
+      modal.style.display = "none";
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = ''; // restore scroll
+    }
+
+    /* ========== Register modal handlers ========== */
+    registerLink.addEventListener("click", () => openModal(registerModal));
+    closeRegister.addEventListener("click", () => closeModalEl(registerModal));
+
+    /* ========== Login modal handlers ========== */
+    loginLink.addEventListener("click", () => openModal(modalLogin));
+    masukBtn.addEventListener("click", () => openModal(modalLogin));
+    closeModal.addEventListener("click", () => closeModalEl(modalLogin));
+
+    /* ========== Click outside to close modals (use capture) ========== */
+    window.addEventListener("click", (e) => {
+      if (e.target === registerModal) closeModalEl(registerModal);
+      if (e.target === modalLogin) closeModalEl(modalLogin);
+    });
+
+    /* ========== Close modals with ESC key ========== */
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModalEl(registerModal);
+        closeModalEl(modalLogin);
+      }
+    });
+
+    /* ========== Register form validation + SweetAlert ========== */
+    formDaftar.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const nama = document.getElementById("nama_penghuni").value.trim();
+      const nim = document.getElementById("nim").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm_password").value;
+
+      // Basic validation
+      if (!nama || !nim || !email || !password || !confirm) {
+        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Semua field harus diisi.' });
+        return;
+      }
+
+      if (password.length < 6) {
+        Swal.fire({ icon: 'warning', title: 'Password lemah', text: 'Password minimal 6 karakter.' });
+        return;
+      }
+
+      if (password !== confirm) {
+        Swal.fire({ icon: 'error', title: 'Konfirmasi salah', text: 'Password dan konfirmasi tidak cocok.' });
+        return;
+      }
+
+      // Jika valid -> tampilkan SweetAlert sukses
+      // NOTE: Di sini masih dummy UI. Nanti diganti fetch/ajax ke backend.
+      Swal.fire({
+        icon: 'success',
+        title: 'Registrasi Berhasil',
+        text: 'Data berhasil dikirim. Silakan login setelah akun diverifikasi.',
+        confirmButtonText: 'Oke'
+      }).then(() => {
+        formDaftar.reset();
+        closeModalEl(registerModal);
+      });
+    });
+
+    /* ========== Menu active highlight (klik) ========== */
+    document.querySelectorAll("nav a").forEach(link => {
+      link.addEventListener("click", function() {
+        document.querySelectorAll("nav a").forEach(l => l.classList.remove("active"));
+        this.classList.add("active");
+        // close mobile nav after clicking a link
+        navMenu.classList.remove("show");
+      });
+    });
+
+    /* ========== Auto close nav on link click (mobile) ========== */
+    document.querySelectorAll("#navMenu a").forEach(link => {
+      link.addEventListener("click", () => navMenu.classList.remove("show"));
+    });
+
+    /* ========== Burger toggle ========== */
+    hamburger.addEventListener("click", () => {
+      navMenu.classList.toggle("show");
+      // simple hamburger animation (rotate bars)
+      hamburger.classList.toggle("open");
+    });
+
+    /* optional visual for hamburger open */
+    /* using CSS transitions inlined via JS class toggle */
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+    `;
+    document.head.appendChild(style);
+
+    /* ========== Navbar color on scroll ========== */
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 40) navbar.classList.add("scrolled");
+      else navbar.classList.remove("scrolled");
+    });
+
+    /* ========== Counters animation for info-kamar ===== */
+    function animateCounters() {
+      const counters = document.querySelectorAll(".info-card p");
+      counters.forEach(counter => {
+        // extract number from text (e.g., "12 Kamar" -> 12)
+        const match = counter.innerText.match(/\d+/);
+        const finalValue = match ? parseInt(match[0], 10) : 0;
+        counter.dataset.final = finalValue;
+        counter.innerText = '0' + (counter.innerText.replace(/\d+/,''));
+        const speed = Math.max(10, 120 - finalValue); // adjust speed based on value
+
+        let current = 0;
+        function update() {
+          if (current < finalValue) {
+            current += Math.ceil(finalValue / 30); // increment step
+            if (current > finalValue) current = finalValue;
+            // preserve suffix text (e.g., " Kamar" or " Orang")
+            const suffix = (counter.dataset.suffix !== undefined) ? counter.dataset.suffix : counter.innerText.replace(/\d+/,'');
+            counter.innerText = current + suffix;
+            setTimeout(update, speed);
+          } else {
+            counter.innerText = finalValue + counter.innerText.replace(/\d+/,'');
+          }
+        }
+        // store suffix if needed
+        counter.dataset.suffix = counter.innerText.replace(/\d+/,'');
+        counter.innerText = '0' + counter.dataset.suffix;
+        update();
+      });
+    }
+
+    // Trigger counters when the section is in viewport
+    function isElementInViewport(el) {
+      const rect = el.getBoundingClientRect();
+      return rect.top <= (window.innerHeight || document.documentElement.clientHeight) && rect.bottom >= 0;
+    }
+
+    let countersStarted = false;
+    window.addEventListener('scroll', () => {
+      const section = document.querySelector('.info-kamar');
+      if (!countersStarted && isElementInViewport(section)) {
+        animateCounters();
+        countersStarted = true;
+      }
+    });
+    // if already visible on load
+    window.addEventListener('load', () => {
+      const section = document.querySelector('.info-kamar');
+      if (!countersStarted && isElementInViewport(section)) {
+        animateCounters();
+        countersStarted = true;
+      }
+    });
+
+    /* ========== Accessibility: focus trap (simple) for modal when open ======
+       For full focus trap you'd need more code; keep it simple: focus first input */
+    function focusFirstInput(modal) {
+      const firstInput = modal.querySelector('input, button, [tabindex]:not([tabindex="-1"])');
+      if (firstInput) firstInput.focus();
+    }
+    registerLink.addEventListener("click", () => setTimeout(() => focusFirstInput(registerModal), 100));
+    loginLink.addEventListener("click", () => setTimeout(() => focusFirstInput(modalLogin), 100));
+    console.log("SIM Asrama UIN Saizu loaded.");
+  </script>
+</body>
+</html>

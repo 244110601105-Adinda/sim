@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Kegiatan - SIM Asrama UIN Saizu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+    body { display:flex; min-height:100vh; background:#eef5f3; color:#333; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width:250px; background:#007e5a; color:white; display:flex; flex-direction:column;
+      position:fixed; height:100vh; box-shadow:2px 0 8px rgba(0,0,0,0.15); transition:left 0.3s ease; z-index:1000;
+      left:0;
+    }
+    .sidebar.collapsed { left:-250px; }
+    .sidebar h2 { text-align:center; padding:25px; background:#009b72; font-size:18px; font-weight:600; }
+    .sidebar ul { list-style:none; margin-top:10px; }
+    .sidebar ul li { padding:14px 25px; transition:0.3s; }
+    .sidebar ul li.active, .sidebar ul li:hover { background:#00b985; }
+    .sidebar ul li a { text-decoration:none; color:white; display:flex; align-items:center; gap:10px; width:100%; }
+    .sidebar i { font-size:18px; width:22px; text-align:center; }
+    .logout-btn { background:none; color:white; border:1px solid white; padding:10px 25px; border-radius:25px; font-size:14px; cursor:pointer; margin:30px auto; width:80%; transition:0.3s; }
+    .logout-btn:hover { background:white; color:#007e5a; }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left:250px; flex-grow:1; padding:30px 40px;
+      transition: margin-left 0.3s ease, width 0.3s ease; width:calc(100% - 250px);
+    }
+    .main-content.fullscreen { margin-left:0; width:100%; }
+
+    /* NAVBAR CARD */
+    .navbar-card {
+      background:white; border-radius:16px; padding:20px 25px;
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:25px; box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    }
+    .navbar-left { display:flex; align-items:center; gap:12px; }
+    .hamburger-box { background:#e6f7ef; padding:8px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .hamburger-box i { font-size:22px; color:#006d55; }
+    .navbar-title { display:flex; align-items:center; gap:8px; font-size:22px; color:#007e5a; font-weight:600; }
+    .user { display:flex; align-items:center; gap:10px; background:#e8f3ef; padding:6px 15px; border-radius:30px; }
+    .user-avatar { width:36px; height:36px; border-radius:50%; object-fit:cover; }
+    .user span { color:#006d55; font-weight:500; }
+
+    /* CARD JADWAL */
+    .card { background:white; border-radius:16px; padding:25px; box-shadow:0 4px 10px rgba(0,0,0,0.08); margin-bottom:25px; }
+    .card h3 { color:#006e5a; margin-bottom:18px; font-size:18px; display:flex; align-items:center; gap:8px; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; text-align:center; }
+    th { background:#007e5a; color:white; }
+    tr:hover { background:#f6fdfb; }
+    .status { font-weight:600; }
+    .akan { color:#006e65; }
+    .selesai { color:green; }
+    .menunggu { color:orange; }
+
+    @media (max-width:768px) {
+      .sidebar { left:-250px; }
+      .main-content { margin-left:0; width:100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2><i class="fa-solid fa-building-columns"></i> Penghuni Asrama</h2>
+    <ul>
+      <li><a href="dashboard_user.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+      <li><a href="profil.html"><i class="fa-solid fa-id-card"></i> Profil Saya</a></li>
+      <li><a href="pembayaran.html"><i class="fa-solid fa-wallet"></i> Pembayaran</a></li>
+      <li class="active"><a href="#"><i class="fa-solid fa-calendar-days"></i> Jadwal Kegiatan</a></li>
+      <li><a href="riwayat.html"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</a></li>
+    </ul>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- NAVBAR CARD -->
+    <div class="navbar-card">
+      <div class="navbar-left">
+        <div class="hamburger-box" onclick="toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </div>
+        <div class="navbar-title"><i class="fa-solid fa-calendar-days"></i> Jadwal Kegiatan</div>
+      </div>
+      <div class="user">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" class="user-avatar">
+        <span id="username"></span>
+      </div>
+    </div>
+
+    <!-- CARD JADWAL -->
+    <div class="card">
+      <h3><i class="fa-solid fa-list"></i> Daftar Jadwal Kegiatan</h3>
+      <table>
+        <tr>
+          <th>Tanggal</th>
+          <th>Waktu</th>
+          <th>Kegiatan</th>
+          <th>Tempat</th>
+          <th>Status</th>
+        </tr>
+        <tr>
+          <td>12 Nov 2025</td>
+          <td>08.00 - 10.00</td>
+          <td>Senam Pagi Bersama</td>
+          <td>Lapangan Asrama</td>
+          <td class="status akan">Akan Datang</td>
+        </tr>
+        <tr>
+          <td>10 Nov 2025</td>
+          <td>19.00 - 21.00</td>
+          <td>Pengajian Rutin</td>
+          <td>Aula Lt. 2</td>
+          <td class="status selesai">Selesai</td>
+        </tr>
+        <tr>
+          <td>07 Nov 2025</td>
+          <td>09.00 - 11.00</td>
+          <td>Gotong Royong Bersama</td>
+          <td>Area Asrama</td>
+          <td class="status selesai">Selesai</td>
+        </tr>
+        <tr>
+          <td>15 Nov 2025</td>
+          <td>13.00 - 15.00</td>
+          <td>Rapat Kegiatan Akhir Bulan</td>
+          <td>Ruang Serbaguna</td>
+          <td class="status menunggu">Menunggu</td>
+        </tr>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // Toggle sidebar
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const mainContent = document.querySelector('.main-content');
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('fullscreen');
+    }
+
+    // Cek login
+    if (localStorage.getItem("isLogin") !== "true") {
+      alert("Silakan login terlebih dahulu!");
+      window.location.href = "login_user.html";
+    }
+
+    // Tampilkan nama user
+    document.getElementById("username").innerText = localStorage.getItem("username");
+
+    // Logout
+    function logout() {
+      if (confirm("Yakin ingin keluar?")) {
+        localStorage.removeItem("isLogin");
+        localStorage.removeItem("username");
+        window.location.href = "index.html";
+      }
+    }
+  </script>
+</body>
+</html>

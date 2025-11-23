@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan - Admin Asrama</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script>
+<style>
+  * {margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif;}
+  body {display:flex; background:#f5f8f7; min-height:100vh; overflow-x:hidden;}
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 250px;
+    height: 100vh;
+    background-color: #007e5a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    transition: left 0.3s ease;
+    z-index: 1000;
+  }
+  .sidebar.collapsed { left: -250px; }
+  .sidebar h2 { text-align: center; padding: 25px; background-color: #009b72; font-size: 18px; font-weight: 600; }
+  .sidebar ul { list-style: none; margin-top: 10px; padding-left: 0; }
+  .sidebar ul li { padding: 14px 25px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+  .sidebar ul li:hover, .sidebar ul li.active { background-color: #00b985; }
+  .logout-btn { background: none; color: white; border: 1px solid white; padding: 10px 25px; border-radius: 25px; font-size: 14px; cursor: pointer; margin: 30px auto; width: 80%; transition: 0.3s; }
+  .logout-btn:hover { background: white; color: #007e5a; }
+
+  /* MAIN CONTENT */
+  .main-content {
+    margin-left: 250px;
+    flex-grow: 1;
+    padding: 30px 40px;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    width: calc(100% - 250px);
+  }
+  .main-content.fullscreen { margin-left: 0; width: 100%; }
+
+  /* TOP BAR */
+  .top-bar {
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    background:white; 
+    padding:10px 20px; 
+    border-radius:16px; 
+    margin-bottom:30px; 
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  }
+  .left-group { display: flex; align-items: center; gap: 15px; }
+  .top-bar h1 { color: #006d55; font-size: 24px; }
+  .profile { display: flex; align-items: center; gap: 10px; background-color: #e8f3ef; padding: 6px 15px; border-radius: 30px; }
+  .profile img { width: 36px; height: 36px; border-radius: 50%; }
+  .profile span { color: #007e5a; font-weight: 500; }
+  .hamburger-card { width:50px; height:50px; border-radius:12px; background:#e6f7ef; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+
+  /* TAB MENU */
+  .tabs {display:flex; gap:15px; margin-bottom:20px;}
+  .tab {background:#e8f3ef; color:#006d55; padding:10px 20px; border-radius:25px; cursor:pointer; transition:0.3s; font-weight:500;}
+  .tab.active {background:#009b72; color:white;}
+
+  /* TABLE */
+  table {width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.08);}
+  th, td {padding:14px 18px; text-align:left; font-size:14px;}
+  th {background:#009b72; color:white;}
+  tr:nth-child(even){background:#f8f9f9;}
+  tr:hover{background:#e8f3ef;}
+  td button {padding:6px 12px; border:none; border-radius:6px; margin-right:6px; cursor:pointer; transition:0.2s; color:white;}
+  td button.edit{background:#007e5a;}
+  td button.delete{background:#d9534f;}
+  td button:hover{opacity:0.85;}
+
+  /* BUTTON TAMBAH */
+  .add-btn {background:#009b72; color:white; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight:500; margin-bottom:20px; transition:0.3s;}
+  .add-btn:hover{background:#00b985;}
+
+  /* POPUP */
+  .popup {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.4); justify-content:center; align-items:center;
+  }
+  .popup-content {
+    background:white; padding:25px 30px; border-radius:10px; width:400px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  }
+  .popup-content h2{margin-bottom:20px; color:#007e5a;}
+  .popup-content input, .popup-content select {width:100%; padding:8px 10px; margin-bottom:12px; border:1px solid #ccc; border-radius:6px;}
+  .popup-content button{padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:500; margin-right:8px; color:white;}
+  .popup-content .save-btn{background:#009b72;}
+  .popup-content .cancel-btn{background:#d9534f;}
+
+  /* RESPONSIVE */
+ @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 200px; left: -200px; z-index: 1000; transition: 0.3s; }
+      .sidebar.active { left: 0; }
+      .main-content { margin-left: 0; width: 100%; padding: 20px; }
+      .hamburger-card { display: inline-block; }
+      table { display: block; width: 100%; overflow-x: auto; white-space: nowrap; }
+    }
+    .toast {
+  position: fixed;
+  bottom: -60px; /* awalnya tersembunyi */
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 200px;
+  text-align: center;
+  opacity: 0;
+  transition: bottom 0.4s ease, opacity 0.4s ease;
+  z-index: 3000;
+}
+.toast.show {
+  bottom: 25px; /* muncul ke atas */
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <h2>Admin Asrama</h2>
+  <ul>
+    <li onclick="goTo('dashboard_admin.html')"><i data-feather="home"></i> Dashboard</li>
+    <li onclick="goTo('data-penghuni.html')"><i data-feather="users"></i> Data Penghuni</li>
+    <li onclick="goTo('jadwal.html')"><i data-feather="calendar"></i> Jadwal</li>
+    <li class="active"><i data-feather="file-text"></i> Laporan</li>
+    <li onclick="goTo('pengaturan.html')"><i data-feather="settings"></i> Pengaturan</li>
+  </ul>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</aside>
+
+<main class="main-content" id="mainContent">
+  <div class="top-bar">
+    <div class="left-group">
+      <div class="hamburger-card" onclick="toggleSidebar()"><i data-feather="menu"></i></div>
+      <h1>Laporan</h1>
+    </div>
+    <div class="profile">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin">
+      <span id="username"></span>
+    </div>
+  </div>
+
+  <!-- TAB -->
+  <div class="tabs">
+    <div class="tab active" id="tabKegiatan" onclick="showTab('kegiatan')">Laporan Kegiatan</div>
+    <div class="tab" id="tabKeuangan" onclick="showTab('keuangan')">Laporan Keuangan</div>
+  </div>
+
+  <!-- LAPORAN KEGIATAN -->
+  <div id="laporanKegiatan">
+    <button class="add-btn" onclick="openPopup('kegiatan')">+ Tambah Laporan Kegiatan</button>
+    <table>
+      <thead>
+        <tr><th>No</th><th>Nama Kegiatan</th><th>Tanggal</th><th>Penanggung Jawab</th><th>Aksi</th></tr>
+      </thead>
+      <tbody id="tbodyKegiatan">
+        <tr><td>1</td><td>Gotong Royong Asrama</td><td>2025-03-10</td><td>Nanda</td>
+          <td>
+            <button class="edit" onclick="editRow(this,'kegiatan')">Edit</button>
+            <button class="delete" onclick="deleteRow(this)">Hapus</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LAPORAN KEUANGAN -->
+  <div id="laporanKeuangan" style="display:none;">
+    <button class="add-btn" onclick="openPopup('keuangan')">+ Tambah Laporan Keuangan</button>
+    <table>
+      <thead>
+        <tr><th>No</th><th>Keterangan</th><th>Tanggal</th><th>Jumlah (Rp)</th><th>Aksi</th></tr>
+      </thead>
+      <tbody id="tbodyKeuangan">
+        <tr><td>1</td><td>Pembelian Alat Kebersihan</td><td>2025-03-05</td><td>150000</td>
+          <td>
+            <button class="edit" onclick="editRow(this,'keuangan')">Edit</button>
+            <button class="delete" onclick="deleteRow(this)">Hapus</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- POPUP -->
+<div class="popup" id="popupForm">
+  <div class="popup-content">
+    <h2 id="formTitle"></h2>
+    <div id="formFields"></div>
+    <div>
+      <button class="save-btn" onclick="saveData()">Simpan</button>
+      <button class="cancel-btn" onclick="closePopup()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+feather.replace();
+
+const adminName = localStorage.getItem("nama_admin") || "Admin";
+document.getElementById("username").innerText = adminName;
+
+function goTo(page){ window.location.href = page; }
+function logout(){ if(confirm("Yakin ingin keluar?")) window.location.href="index.html"; }
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('mainContent').classList.toggle('fullscreen');
+}
+
+let currentTab='kegiatan';
+function showTab(tab){
+  document.getElementById('laporanKegiatan').style.display = tab==='kegiatan'?'block':'none';
+  document.getElementById('laporanKeuangan').style.display = tab==='keuangan'?'block':'none';
+  document.getElementById('tabKegiatan').classList.toggle('active', tab==='kegiatan');
+  document.getElementById('tabKeuangan').classList.toggle('active', tab==='keuangan');
+  currentTab=tab;
+}
+
+let editIndex=null;
+function openPopup(type, edit=false){
+  document.getElementById('popupForm').style.display='flex';
+  const formFields=document.getElementById('formFields');
+  document.getElementById('formTitle').innerText=edit?'Edit Laporan '+type:'Tambah Laporan '+type;
+
+  if(type==='kegiatan'){
+    formFields.innerHTML=`
+      <input id="namaKegiatan" placeholder="Nama Kegiatan">
+      <input id="tanggalKegiatan" type="date">
+      <input id="pj" placeholder="Penanggung Jawab">
+    `;
+  } else {
+    formFields.innerHTML=`
+      <input id="keterangan" placeholder="Keterangan">
+      <input id="tanggalKeuangan" type="date">
+      <input id="jumlah" type="number" placeholder="Jumlah (Rp)">
+    `;
+  }
+}
+
+function closePopup(){ document.getElementById('popupForm').style.display='none'; editIndex=null; }
+function deleteRow(btn){ if(confirm('Yakin ingin menghapus data ini?')) btn.closest('tr').remove(); }
+function editRow(btn,type){
+  openPopup(type,true);
+  const row=btn.closest('tr'); editIndex=row.rowIndex-1;
+  if(type==='kegiatan'){
+    document.getElementById('namaKegiatan').value=row.cells[1].innerText;
+    document.getElementById('tanggalKegiatan').value=row.cells[2].innerText;
+    document.getElementById('pj').value=row.cells[3].innerText;
+  } else {
+    document.getElementById('keterangan').value=row.cells[1].innerText;
+    document.getElementById('tanggalKeuangan').value=row.cells[2].innerText;
+    document.getElementById('jumlah').value=row.cells[3].innerText;
+  }
+}
+
+function saveData(){
+  const tbody=document.getElementById(currentTab==='kegiatan'?'tbodyKegiatan':'tbodyKeuangan');
+  if(currentTab==='kegiatan'){
+    const nama=document.getElementById('namaKegiatan').value;
+    const tanggal=document.getElementById('tanggalKegiatan').value;
+    const pj=document.getElementById('pj').value;
+    if(!nama||!tanggal||!pj) return alert('Lengkapi semua data!');
+    if(editIndex!==null){
+      const row=tbody.rows[editIndex];
+      row.cells[1].innerText=nama;
+      row.cells[2].innerText=tanggal;
+      row.cells[3].innerText=pj;
+      showToast("Laporan kegiatan berhasil diperbarui!");
+    } else {
+      const row=`<tr><td>${tbody.rows.length+1}</td><td>${nama}</td><td>${tanggal}</td><td>${pj}</td>
+        <td><button class='edit' onclick="editRow(this,'kegiatan')">Edit</button>
+        <button class='delete' onclick="deleteRow(this)">Hapus</button></td></tr>`;
+      tbody.insertAdjacentHTML('beforeend',row);
+      showToast("Laporan kegiatan berhasil ditambahkan!");
+    }
+  } else {
+    const ket=document.getElementById('keterangan').value;
+    const tgl=document.getElementById('tanggalKeuangan').value;
+    const jml=document.getElementById('jumlah').value;
+    if(!ket||!tgl||!jml) return alert('Lengkapi semua data!');
+    if(editIndex!==null){
+      const row=tbody.rows[editIndex];
+      row.cells[1].innerText=ket;
+      row.cells[2].innerText=tgl;
+      row.cells[3].innerText=jml;
+      showToast("Laporan keuangan berhasil diperbarui!");
+    } else {
+      const row=`<tr><td>${tbody.rows.length+1}</td><td>${ket}</td><td>${tgl}</td><td>${jml}</td>
+        <td><button class='edit' onclick="editRow(this,'keuangan')">Edit</button>
+        <button class='delete' onclick="deleteRow(this)">Hapus</button></td></tr>`;
+      tbody.insertAdjacentHTML('beforeend',row);
+      showToast("Laporan keuangan berhasil ditambahkan!");
+    }
+  }
+  closePopup();
+}
+function deleteRow(btn){
+  if(confirm("Yakin hapus?")){
+    btn.closest("tr").remove();
+    showToast("Data laporan berhasil dihapus!");
+  }
+}
+// tampilkan nama admin
+  document.getElementById("username").innerText = localStorage.getItem("username");
+  // fungsi toast
+  function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerText = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.classList.add('show'), 50);
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 2500);
+}
+</script>
+</body>
+</html>
